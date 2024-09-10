@@ -1,43 +1,52 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 
 interface AudioRecorderProps {
   isRecording: boolean
   onStart: () => void
-  onStop: (audioBlob: Blob) => void
+  onStop: () => void
+  onTranscriptUpdate: (transcript: string) => void
 }
 
-const AudioRecorder: React.FC<AudioRecorderProps> = ({ isRecording, onStart, onStop }) => {
-  const mediaRecorder = useRef<MediaRecorder | null>(null)
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([])
+const AudioRecorder: React.FC<AudioRecorderProps> = ({ isRecording, onStart, onStop, onTranscriptUpdate }) => {
+  const recognitionRef = useRef<any>(null);
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      mediaRecorder.current = new MediaRecorder(stream, { mimeType: 'audio/webm' })
-      mediaRecorder.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          setAudioChunks((chunks) => [...chunks, event.data])
-        }
-      }
-      mediaRecorder.current.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
-        onStop(audioBlob)
-        setAudioChunks([])
-      }
-      mediaRecorder.current.start()
-      onStart()
-    } catch (error) {
-      console.error('Error starting recording:', error)
-    }
-  }
+  const startRecording = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.lang = 'id';
+    recognitionRef.current.continuous = true;
+    recognitionRef.current.interimResults = true;
+
+    recognitionRef.current.onresult = (event: any) => {
+      const currentTranscript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('');
+      onTranscriptUpdate(currentTranscript);
+    };
+
+    recognitionRef.current.onend = () => {
+      onStop();
+    };
+
+    recognitionRef.current.start();
+    onStart();
+  };
 
   const stopRecording = () => {
-    if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
-      mediaRecorder.current.stop()
-      mediaRecorder.current.stream.getTracks().forEach(track => track.stop())
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
     }
-  }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   return (
     <div>
@@ -47,7 +56,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ isRecording, onStart, onS
         <Button onClick={stopRecording} variant="destructive">Stop Recording</Button>
       )}
     </div>
-  )
-}
+  );
+};
 
 export default AudioRecorder

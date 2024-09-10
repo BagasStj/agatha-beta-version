@@ -19,6 +19,8 @@ import { format } from 'date-fns';
 import { TimePicker } from 'antd';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import CallHistorySchedule from './CallHistorySchedule';
+import { startCallService } from '@/lib/call-service';
 
 dayjs.extend(utc);
 
@@ -125,6 +127,7 @@ export default function PhoneCallSchedule() {
   const [activeTab, setActiveTab] = useState('llm-model');
   const [isCallScheduled, setIsCallScheduled] = useState(false);
   const [scheduledTime, setScheduledTime] = useState<dayjs.Dayjs | null>(dayjs());
+  const [scheduledCallTimeout, setScheduledCallTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<PhoneCallFormData>({
     resolver: zodResolver(PhoneCallSchema),
@@ -165,8 +168,8 @@ export default function PhoneCallSchedule() {
 
 
 
-  const startCall = useCallback(async (data: PhoneCallFormData) => {
-    console.log('Memulai panggilan pada:', new Date().toLocaleString());
+  const startCall = useCallback(async (data: PhoneCallFormData, scheduledCallId?: string) => {
+    console.log('Starting call at:', new Date().toLocaleString());
     if (!user?.id) {
       toast({
         title: "Error",
@@ -288,6 +291,7 @@ export default function PhoneCallSchedule() {
       }
 
       setRefreshHistory(prev => prev + 1);
+      await startCallService(data, scheduledCallId);
 
       toast({
         title: "Call Started",
@@ -318,8 +322,8 @@ export default function PhoneCallSchedule() {
 
       if (timeUntilCall > 0) {
         setIsCallScheduled(true);
-        
-        // Schedule the call using the new API
+
+        // Schedule the call in the database
         const response = await fetch('/api/schedule-call', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -333,12 +337,20 @@ export default function PhoneCallSchedule() {
         const result = await response.json();
 
         if (result.success) {
+          // Schedule the call locally
+          const timeout = setTimeout(() => {
+            startCall(data, result.id);
+            setIsCallScheduled(false);
+          }, timeUntilCall);
+
+          setScheduledCallTimeout(timeout);
+
           toast({
             title: "Call Scheduled",
             description: `Your call has been scheduled for ${scheduledTime.format('DD MMMM YYYY HH:mm:ss')}`,
             duration: 3000,
           });
-          console.log('Call scheduled successfully:', result);
+          console.log('Call scheduled successfully for:', scheduledTime.format('DD MMMM YYYY HH:mm:ss'));
         } else {
           toast({
             title: "Error",
@@ -346,10 +358,7 @@ export default function PhoneCallSchedule() {
             duration: 3000,
             variant: "destructive",
           });
-          console.error('Failed to schedule call:', result);
         }
-
-        setIsCallScheduled(false);
       } else {
         toast({
           title: "Invalid Time",
@@ -362,6 +371,15 @@ export default function PhoneCallSchedule() {
       startCall(data);
     }
   }, [scheduledTime, startCall, toast, user]);
+
+  // Clean up the timeout when component unmounts
+  useEffect(() => {
+    return () => {
+      if (scheduledCallTimeout) {
+        clearTimeout(scheduledCallTimeout);
+      }
+    };
+  }, [scheduledCallTimeout]);
 
   const endCall = useCallback(() => {
     if (vapiClient) {
@@ -603,7 +621,7 @@ export default function PhoneCallSchedule() {
             </div>
           </TabsContent>
           <TabsContent value="history-call" className="mt-4">
-            <CallHistory refreshTrigger={refreshHistory} />
+            <CallHistorySchedule refreshTrigger={refreshHistory} />
           </TabsContent>
         </Tabs>
       </form>

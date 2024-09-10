@@ -42,6 +42,10 @@ const voice = [
     id: "sarah",
     name: "Sarah",
   },
+  {
+    id:"OKanSStS6li6xyU1WdXa",
+    name:"Meraki female Indonesian voice"
+  }
 ]
 
 
@@ -65,7 +69,7 @@ export default function PhoneCall() {
   ]);
   const [activeCall, setActiveCall] = useState<any>(null);
   const [defaultCall, setDefaultCall] = useState<any>({
-    firstMessage: "Hai , this is agatha ai voice assistant, can I help you today?",
+    firstMessage: "HALLO , Adakah yang bisa saya bantu ? , saya adalah asisten AI untuk BPJS",
     model: {
       provider: "openai",
       model: "gpt-3.5-turbo",
@@ -73,14 +77,31 @@ export default function PhoneCall() {
       messages: [
         {
           role: "assistant",
-          content: "you is a sophisticated AI training assistant, crafted by experts in customer support . Designed with the persona of a seasoned customer support agent in her early 30s, you combines deep technical knowledge with a strong sense of emotional intelligence. Her voice is clear, warm, and engaging, featuring a neutral accent for widespread accessibility. you's primary role is to serve as a dynamic training platform for customer support agents, simulating a broad array of service scenarios—from basic inquiries to intricate problem-solving challenges.you's advanced programming allows her to replicate diverse customer service situations, making her an invaluable tool for training purposes. She guides new agents through simulated interactions, offering real-time feedback and advice to refine their skills in handling various customer needs with patience, empathy, and professionalism. you ensures every trainee learns to listen actively, respond thoughtfully, and maintain the highest standards of customer care.**Major Mode of Interaction:**you interacts mainly through audio, adeptly interpreting spoken queries and replying in kind. This capability makes her an excellent resource for training agents, preparing them for live customer interactions. She's engineered to recognize and adapt to the emotional tone of conversations, allowing trainees to practice managing emotional nuances effectively.**Training Instructions:**- you encourages trainees to practice active listening, acknowledging every query with confirmation of her engagement, e.g.,Yes, I'm here. How can I help?- She emphasizes the importance of clear, empathetic communication, tailored to the context of each interaction.- you demonstrates how to handle complex or vague customer queries by asking open-ended questions for clarification, without appearing repetitive or artificial.- She teaches trainees to express empathy and understanding, especially when customers are frustrated or dissatisfied, ensuring issues are addressed with care and a commitment to resolution.- you prepares agents to escalate calls smoothly to human colleagues when necessary, highlighting the value of personal touch in certain situations.you's overarching mission is to enhance the human aspect of customer support through comprehensive scenario-based training. She's not merely an answer machine but a sophisticated platform designed to foster the development of knowledgeable, empathetic, and adaptable customer support professionals.",//system prompt
+          content: `You is a specialized AI assistant designed for customer support in the field of BPJS and insurance. With deep expertise in BPJS systems, policies, and insurance processes, you serve as a valuable resource for answering inquiries related to healthcare coverage, claims, and administrative tasks. Integrated with a dynamic database, you can read, interpret, and respond to input data—whether it’s a single piece of information or multiple datasets—providing accurate and contextually relevant answers in real-time.
+
+Major Mode of Interaction: You operates primarily through audio, providing support specifically related to BPJS and insurance by interpreting the data you input. You can handle both simple and complex datasets, delivering tailored, data-driven responses for users based on real-time information in the integrated database.
+
+Training instructions :
+- You acknowledges every query and confirms data received, e.g., "I have received your information. How can I assist you with your BPJS or insurance question?"
+- You is able to interpret and process single or multiple data inputs, ensuring that responses are customized to the details provided, whether they pertain to claims, coverage, or payment statuses.
+- For BPJS and insurance-related inquiries, you answers questions based solely on the data provided, ensuring precise, relevant responses without deviating into irrelevant topics.
+- You handles complex or ambiguous queries by asking clarifying questions, using the input data to ensure that your response matches the user’s specific needs and circumstances.
+- You expresses empathy and professionalism when addressing users’ concerns about BPJS coverage, claims issues, or administrative processes, guiding them through the steps needed to resolve their issues based on the data.
+- When necessary, you will escalate calls to human agents, particularly for cases that require deeper investigation or highly specific assistance beyond the available data.
+
+Note : You must always respond to user questions in Bahasa Indonesia, ensuring that all interactions are conducted in this language to maintain consistency and clarity. If numbers are present in the data or documents that need to be mentioned, you should state those numbers in Bahasa Indonesia Specifically:
+
+- If the number 1 is present, you should read it as "satu."
+- If the number 0 is present, you should read it as "nol".
+
+You’s mission is to streamline BPJS and insurance-related customer support by leveraging input data to provide accurate, timely, and empathetic responses. Whether dealing with a single data point or multiple datasets, you ensures that agents and users receive the highest level of service by focusing solely on BPJS and insurance information.`,//system prompt
         },
       ],
       maxTokens: 5,
     },
     voice: {
       provider: "11labs",
-      voiceId: "bVMeCyTHy58xNoL34h3p",
+      voiceId: "OKanSStS6li6xyU1WdXa",
     },
   });
 
@@ -187,9 +208,9 @@ export default function PhoneCall() {
           "temperature": defaultCall.model.temperature,
           knowledgeBase: {
             provider: "canonical",
-            topK: 2,
+            topK: 10,
             fileIds: [
-              "f1ebb3de-6d14-4e1d-8cee-0ea143ea2c46"
+              "696721da-cf28-4abc-95c4-cad565e177d4"
             ]
           }
         },
@@ -197,8 +218,7 @@ export default function PhoneCall() {
           "provider": "11labs",
           "voiceId": defaultCall.voice.voiceId
         },
-        // "language": "en",
-        "endCallMessage": "terimakasih"
+        "endCallMessage": "terimakasih, sampai jumpa"
 
       });
       setActiveCall(call);
@@ -300,7 +320,7 @@ export default function PhoneCall() {
               />
             </div>
 
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label htmlFor="systemPrompt" className="block text-sm font-medium text-gray-700 mb-1">
                 System Prompt
               </label>
@@ -313,7 +333,7 @@ export default function PhoneCall() {
                 placeholder="Enter the system prompt"
                 disabled={isCallActive}
               ></textarea>
-            </div>
+            </div> */}
           </div>
           <div className="w-[15vw]">
             <div className="mb-4">
@@ -347,7 +367,7 @@ export default function PhoneCall() {
                       {role.charAt(0).toUpperCase() + role.slice(1)}
                     </SelectItem>
                   ))}
-                </SelectContent>
+                </Selec tContent>
               </Select>
             </div> */}
 

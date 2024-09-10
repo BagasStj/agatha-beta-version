@@ -197,7 +197,7 @@ export default function ChatArea({
     setIsListening(true)
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const recognition = new SpeechRecognition()
-    recognition.lang = 'en-US'
+    recognition.lang = 'id'
     recognition.continuous = true
     recognition.interimResults = true
 

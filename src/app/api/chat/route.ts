@@ -7,6 +7,8 @@ import { Langfuse } from 'langfuse-node';
 import { ConversationTokenBufferMemory } from "langchain/memory";
 import { ConversationChain } from "langchain/chains";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { OpenAIEmbeddings } from '@langchain/openai';
 
 export const runtime = 'edge'
 
@@ -24,7 +26,7 @@ const chatRatelimit = new Ratelimit({
 export async function POST(req: Request) {
   try {
     console.log('Starting POST request');
-    const { messages, model, temperature, prompt, topP, presencePenalty, frequencyPenalty, maxTokens, traceId, userId, username } = await req.json()
+    const { messages, model, temperature, prompt, topP, presencePenalty, frequencyPenalty, maxTokens, traceId, userId, username, uploadedText } = await req.json()
     console.log('Request body parsed:', { model, temperature, prompt, topP, presencePenalty, frequencyPenalty, maxTokens, traceId, userId, username });
 
     if (!userId || !username) {
@@ -88,10 +90,19 @@ export async function POST(req: Request) {
       ["human", "{input}"],
     ]);
 
+    // If there's uploaded text, create a vector store and use it for retrieval
+    let vectorStore;
+    if (uploadedText) {
+      const embeddings = new OpenAIEmbeddings();
+      vectorStore = await MemoryVectorStore.fromTexts([uploadedText], [], embeddings);
+    }
+
     const chain = new ConversationChain({
       llm: llm,
       memory: memory,
       prompt: chatPrompt,
+      // Add this if you want to use the vector store for retrieval
+      // retriever: vectorStore ? vectorStore.asRetriever() : undefined,
     });
 
     console.log('Chain initialized');

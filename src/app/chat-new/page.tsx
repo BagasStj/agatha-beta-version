@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Mic, Send, Edit, Trash2, PlusIcon, MoreVertical, ListIcon, ListPlus, CalendarIcon, PencilIcon, TrashIcon, UserIcon, CheckIcon, CopyIcon, BotMessageSquare } from "lucide-react";
+import { Mic, Send, Edit, Trash2, PlusIcon, MoreVertical, ListIcon, ListPlus, CalendarIcon, PencilIcon, TrashIcon, UserIcon, CheckIcon, CopyIcon, BotMessageSquare, FilePlus2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import PromptDialog from './components/PromptDialog';
 import { useUser } from '@clerk/nextjs';
@@ -31,6 +31,8 @@ import {
 import { Toaster } from '@/components/ui/toaster';
 import { isSameDay } from 'date-fns';
 import { Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import DocumentUploadPopup from './components/DocumentUploadPopup';
 
 const DEFAULT_PROMPT: any = {
   id: 'default',
@@ -611,6 +613,13 @@ export default function ChatNewPage() {
     }
   };
 
+  const handleUploadSuccess = (text: string) => {
+    // Here you can handle the uploaded document text
+    // For example, you could add it to the chat history or send it to the AI
+    console.log("Uploaded document text:", text);
+    // You might want to send this to your API to process and add to the AI's knowledge
+  };
+
   return (
     <>
       <Toaster />
@@ -772,6 +781,21 @@ export default function ChatNewPage() {
                   value={input}
                   onChange={handleInputChange}
                 />
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      type="button" 
+                      size="icon" 
+                      className="bg-purple-600 hover:bg-purple-700"
+                      title="Upload knowledge"
+                    >
+                      <FilePlus2 className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DocumentUploadPopup onUploadSuccess={handleUploadSuccess} />
+                  </DialogContent>
+                </Dialog>
                 <Button type="submit" size="icon" disabled={isLoading || isTyping}>
                   <Send className="h-4 w-4" />
                 </Button>

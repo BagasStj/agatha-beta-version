@@ -13,6 +13,7 @@ export async function POST(req: Request) {
         userId,
         scheduledTime,
         callData: JSON.stringify(callData),
+        status: 'PENDING',
       },
     });
 
