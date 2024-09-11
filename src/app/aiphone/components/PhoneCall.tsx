@@ -210,7 +210,8 @@ You’s mission is to streamline BPJS and insurance-related customer support by 
             provider: "canonical",
             topK: 10,
             fileIds: [
-              "696721da-cf28-4abc-95c4-cad565e177d4"
+              "696721da-cf28-4abc-95c4-cad565e177d4",
+              "eb6f3cd5-ba77-4d06-890d-241f6d3ce3dd"
             ]
           }
         },
